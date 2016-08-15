@@ -50,6 +50,10 @@ public class LoginFilter implements Filter {
 			String sessionId=getSessionId(httpRequest, httpResponse, false);
 			SessionManager sessionManager=ApplicationContextHelper.getBean(SessionManager.class);
 			String ticket=request.getParameter("ticket");
+			boolean requireRedirect=false;
+			if(StringUtils.isNotBlank(ticket)){
+				requireRedirect=true;
+			}
 			if(StringUtils.isBlank(ticket)){
 				ticket=sessionManager.retrieveFromSession(SessionManager.CLIENT_SESSION_KEY_PREFIX+sessionId);
 			}
@@ -61,6 +65,13 @@ public class LoginFilter implements Filter {
 					casBase=urlParameterAdd(casBase, webBase);
 					httpResponse.sendRedirect(casBase);
 					return;
+				}else{
+					if (requireRedirect) {
+						String webBase = PropertiesLoader.getProperty("web.base");
+						sessionManager.putSession(SessionManager.CLIENT_SESSION_KEY_PREFIX + sessionId, ticket);
+						httpResponse.sendRedirect(webBase);
+						return;
+					}
 				}
 			}else{
 				String casBase=PropertiesLoader.getProperty("cas.base")+"/login.jsp";

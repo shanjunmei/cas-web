@@ -55,6 +55,13 @@ public class LoginFilter implements Filter {
 			}
 			if(StringUtils.isNotBlank(ticket)){//server  login
 				String auth=sessionManager.retrieveFromSession(SessionManager.SERVER_SESSION_KEY_PREFIX+ticket);
+				if(StringUtils.isBlank(auth)){
+					String casBase=PropertiesLoader.getProperty("cas.base")+"/login.jsp";
+					String webBase=PropertiesLoader.getProperty("web.base");
+					casBase=urlParameterAdd(casBase, webBase);
+					httpResponse.sendRedirect(casBase);
+					return;
+				}
 			}else{
 				String casBase=PropertiesLoader.getProperty("cas.base")+"/login.jsp";
 				String webBase=PropertiesLoader.getProperty("web.base");

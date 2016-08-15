@@ -38,7 +38,7 @@ public class UserLoginServlet extends HttpServlet {
             String service = request.getParameter("service");
             if(StringUtils.isBlank(service)){
                 //FIXME
-                service= PropertiesLoader.getProperty("cas.base")+"/login";
+               // service= PropertiesLoader.getProperty("cas.base")+"/login";
             }else{
                String uri= request.getRequestURI();
                 StringBuffer url=request.getRequestURL();
@@ -64,11 +64,12 @@ public class UserLoginServlet extends HttpServlet {
                     //上一次登录有效期还未过
                     System.out.println("last login has't expire");
                     service = urlParameterAdd(sessionId, service);
-                   // response.sendRedirect(service);
+                    response.sendRedirect(service);
                     System.out.println("redirect to:"+service);
                     return;
                 } else {
                     //上一次登录有效期已过
+                	response.sendRedirect(PropertiesLoader.getProperty("cas.base")+"/login.jsp?service"+service);
                     System.out.println("last login had expire");
                 }
             }
@@ -89,6 +90,8 @@ public class UserLoginServlet extends HttpServlet {
                     }*/
                     System.out.println("login success");
                     //redirect to service;
+                    response.sendRedirect(service);
+                    return;
                 } else {
                     System.out.println("login fail");
                     //redirect current page

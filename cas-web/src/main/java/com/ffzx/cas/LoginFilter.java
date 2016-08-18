@@ -60,24 +60,18 @@ public class LoginFilter implements Filter {
 			if(StringUtils.isNotBlank(ticket)){//server  login
 				String auth=sessionManager.retrieveFromSession(SessionManager.SERVER_SESSION_KEY_PREFIX+ticket);
 				if(StringUtils.isBlank(auth)){
-					String casBase=PropertiesLoader.getProperty("cas.base")+"/login.jsp";
-					String webBase=PropertiesLoader.getProperty("web.base");
-					casBase=urlParameterAdd(casBase, webBase);
-					httpResponse.sendRedirect(casBase);
+					redirect(httpResponse);
 					return;
 				}else{
-					if (requireRedirect) {
+					//if (requireRedirect) {
 						String webBase = PropertiesLoader.getProperty("web.base");
 						sessionManager.putSession(SessionManager.CLIENT_SESSION_KEY_PREFIX + sessionId, ticket);
 						httpResponse.sendRedirect(webBase);
 						return;
-					}
+				//	}
 				}
 			}else{
-				String casBase=PropertiesLoader.getProperty("cas.base")+"/login.jsp";
-				String webBase=PropertiesLoader.getProperty("web.base");
-				casBase=urlParameterAdd(casBase, webBase);
-				httpResponse.sendRedirect(casBase);
+				redirect(httpResponse);
 				return;
 			}
 			
@@ -87,6 +81,13 @@ public class LoginFilter implements Filter {
 	
 		// pass the request along the filter chain
 		chain.doFilter(request, response);
+	}
+
+	private void redirect(HttpServletResponse httpResponse) throws IOException {
+		String casBase= PropertiesLoader.getProperty("cas.base")+"/login.jsp";
+		String webBase=PropertiesLoader.getProperty("web.base");
+		casBase=urlParameterAdd(casBase, webBase);
+		httpResponse.sendRedirect(casBase);
 	}
 
 	/**

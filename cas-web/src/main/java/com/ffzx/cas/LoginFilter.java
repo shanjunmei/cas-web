@@ -49,33 +49,27 @@ public class LoginFilter implements Filter {
 			
 			String sessionId=getSessionId(httpRequest, httpResponse, false);
 			SessionManager sessionManager=ApplicationContextHelper.getBean(SessionManager.class);
-			String ticket=request.getParameter("ticket");
-			boolean requireRedirect=false;
-			if(StringUtils.isNotBlank(ticket)){
-				requireRedirect=true;
-			}
-			if(StringUtils.isBlank(ticket)){
-				ticket=sessionManager.retrieveFromSession(SessionManager.CLIENT_SESSION_KEY_PREFIX+sessionId);
-			}
-			if(StringUtils.isNotBlank(ticket)){//server  login
-				String auth=sessionManager.retrieveFromSession(SessionManager.SERVER_SESSION_KEY_PREFIX+ticket);
-				if(StringUtils.isBlank(auth)){
+			String ticket=sessionManager.retrieveFromSession(SessionManager.CLIENT_SESSION_KEY_PREFIX+sessionId);;
+			if(StringUtils.isNotBlank(ticket)){//已经登录
+				//延长服务端session实效
+				sessionManager.retrieveFromSession(SessionManager.SERVER_SESSION_KEY_PREFIX+ticket);
+			}else{
+				 ticket=request.getParameter("ticket");
+				if(StringUtils.isBlank(ticket)){//未登录
+					//redirct to cas
 					redirect(httpResponse);
 					return;
 				}else{
-					//if (requireRedirect) {
-						String webBase = PropertiesLoader.getProperty("web.base");
-						sessionManager.putSession(SessionManager.CLIENT_SESSION_KEY_PREFIX + sessionId, ticket);
-						httpResponse.sendRedirect(webBase);
+					String auth=sessionManager.retrieveFromSession(SessionManager.SERVER_SESSION_KEY_PREFIX+ticket);
+					if(StringUtils.isBlank(auth)){
+						redirect(httpResponse);
 						return;
-				//	}
+					}else{
+						sessionManager.putSession(SessionManager.CLIENT_SESSION_KEY_PREFIX+sessionId,ticket);
+					}
 				}
-			}else{
-				redirect(httpResponse);
-				return;
 			}
-			
-			
+
 			
 		}
 	
@@ -84,7 +78,7 @@ public class LoginFilter implements Filter {
 	}
 
 	private void redirect(HttpServletResponse httpResponse) throws IOException {
-		String casBase= PropertiesLoader.getProperty("cas.base")+"/login.jsp";
+		String casBase= PropertiesLoader.getProperty("cas.base")+"/login";
 		String webBase=PropertiesLoader.getProperty("web.base");
 		casBase=urlParameterAdd(casBase, webBase);
 		httpResponse.sendRedirect(casBase);

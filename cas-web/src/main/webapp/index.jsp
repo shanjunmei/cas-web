@@ -8,11 +8,6 @@
 <title>Cas Web Page</title>
 </head>
 <body>
-	<form action="login" method="post">
-		<input type="hidden" name="service" value="<%=request.getParameter("service")%>">
-		User:<input name="userName" /> 
-		Password:<input name="password" /> 
-		<input type="submit" value="登录" />
-	</form>
+	<h1>Welcome to home</h1>
 </body>
 </html>
